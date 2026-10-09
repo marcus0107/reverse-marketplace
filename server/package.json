@@ -1,0 +1,27 @@
+{
+  "name": "reverse-marketplace",
+  "version": "1.0.0",
+  "private": true,
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "db:init": "node scripts/init-db.js",
+    "db:seed": "node scripts/seed.js",
+    "mpesa:fake": "node scripts/fake-payment.js",
+    "email:test": "node scripts/test-email.js",
+    "account:set": "node scripts/set-account.js",
+    "admin:make": "node scripts/make-admin.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.6",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.4.0",
+    "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.11.0",
+    "nodemailer": "^6.10.1"
+  }
+}
