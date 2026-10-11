@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+require('express-async-errors'); // sends errors from async routes to the error handler instead of crashing
 const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
 const rateLimit = require('express-rate-limit');
@@ -36,17 +37,24 @@ app.use('/api/admin', require('./src/routes/admin'));
 app.use('/api/companies', require('./src/routes/companies'));
 app.use('/api', (req, res) => res.status(404).json({ error: 'Not found' }));
 
-// Optional: serve the built React client if a client/dist folder sits next to this server
-const dist = path.join(__dirname, 'client', 'dist');
-if (require('fs').existsSync(dist)) {
+// Serve the built React client when it exists (repo layout: ../client/dist next to the server folder)
+const fs = require('fs');
+const dist = [path.join(__dirname, '..', 'client', 'dist'), path.join(__dirname, 'client', 'dist')].find(p => fs.existsSync(p));
+if (dist) {
   app.use(express.static(dist));
   app.get('*', (req, res) => res.sendFile(path.join(dist, 'index.html')));
 }
 
 app.use((err, req, res, next) => {
   console.error(err);
-  res.status(500).json({ error: 'Server error' });
+  const dbDown = ['ECONNREFUSED', 'PROTOCOL_CONNECTION_LOST', 'ETIMEDOUT', 'ENOTFOUND', 'ER_CON_COUNT_ERROR'].includes(err.code);
+  res.status(dbDown ? 503 : 500).json({
+    error: dbDown ? 'The service is having trouble right now. Please try again in a moment.' : 'Server error'
+  });
 });
+
+// Last safety net: log stray promise errors instead of killing the server
+process.on('unhandledRejection', e => console.error('Unhandled rejection:', e));
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Reverse running on http://localhost:${port}`));

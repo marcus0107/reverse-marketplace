@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { api, money } from '../api';
 import { useApp } from '../context.jsx';
 
@@ -12,9 +12,28 @@ export default function Pricing() {
   const [state, setState] = useState('idle'); // idle | sending | waiting | success | failed
   const [message, setMessage] = useState('');
   const timer = useRef(null);
+  const formRef = useRef(null);
+  const [params] = useSearchParams();
 
   useEffect(() => { api('/payments/plans').then(setPlans).catch(e => notify(e.message)); }, [notify]);
   useEffect(() => () => clearInterval(timer.current), []);
+
+  // Arriving from the home page with ?plan=monthly selects that plan straight away
+  useEffect(() => {
+    const id = params.get('plan');
+    if (id && user && plans.length) {
+      const p = plans.find(x => x.id === id);
+      if (p) setChosen(p);
+    }
+  }, [params, user, plans]);
+
+  // When a plan is chosen, bring the payment form into view
+  useEffect(() => {
+    if (chosen && formRef.current) {
+      formRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      formRef.current.querySelector('input')?.focus({ preventScroll: true });
+    }
+  }, [chosen]);
 
   function poll(paymentId) {
     let tries = 0;
@@ -64,19 +83,19 @@ export default function Pricing() {
 
       <div className="category-grid">
         {plans.map(p => (
-          <div className="category-card" key={p.id} style={{ display: 'block' }}>
+          <div className="category-card" key={p.id} style={{ display: 'block', outline: chosen?.id === p.id ? '3px solid #6d28d9' : 'none' }}>
             <h3>{p.label}</h3>
             <div className="price-big">{money(p.amount)}</div>
             <p>{p.days} days of access{p.savePercent ? ` · save ${p.savePercent}%` : ''}</p>
             <button className="btn btn-primary" style={{ width: '100%' }} onClick={() => choose(p)}>
-              {user ? 'Pay with M-Pesa' : 'Start free trial'}
+              {chosen?.id === p.id ? 'Selected ✓' : user ? 'Pay with M-Pesa' : 'Start free trial'}
             </button>
           </div>
         ))}
       </div>
 
       {chosen && (
-        <form className="form-card" style={{ marginTop: 24 }} onSubmit={pay}>
+        <form ref={formRef} className="form-card" style={{ marginTop: 24 }} onSubmit={pay}>
           <h3>{chosen.label} plan · {money(chosen.amount)}</h3>
           <div className="field">
             <label>M-Pesa phone number</label>

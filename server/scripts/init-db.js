@@ -5,12 +5,7 @@ const mysql = require('mysql2/promise');
 
 (async () => {
   const name = process.env.DB_NAME || 'reverse';
-  const conn = await mysql.createConnection({
-    host: process.env.DB_HOST || 'localhost',
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '',
-    multipleStatements: true
-  });
+  const conn = await mysql.createConnection({ ...require('../src/dbconfig'), multipleStatements: true });
   await conn.query(`CREATE DATABASE IF NOT EXISTS \`${name}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`);
   await conn.query(`USE \`${name}\``);
   await conn.query(fs.readFileSync(path.join(__dirname, '../db/schema.sql'), 'utf8'));

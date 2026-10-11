@@ -70,7 +70,7 @@ export default function Home() {
             <h3>{p.label}</h3>
             <div className="price-big">{money(p.amount)}</div>
             <p>{p.days} days of access{p.savePercent ? ` · save ${p.savePercent}%` : ''}</p>
-            <Link className="btn btn-primary" style={{ width: '100%', marginTop: 14 }} to="/pricing">Choose plan</Link>
+            <Link className="btn btn-primary" style={{ width: '100%', marginTop: 14 }} to={`/pricing?plan=${p.id}`}>Choose plan</Link>
           </div>
         ))}
       </div>
