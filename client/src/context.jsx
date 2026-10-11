@@ -9,7 +9,10 @@ export function AppProvider({ children }) {
   const [toast, setToast] = useState('');
 
   const refresh = useCallback(async () => {
-    try { setUser(await api('/auth/me')); } catch { setUser(null); }
+    try {
+      const u = await api('/auth/me');
+      setUser({ ...u, isAdmin: Boolean(u.isAdmin) }); // MySQL returns 0/1; a bare 0 would print on the page
+    } catch { setUser(null); }
   }, []);
   useEffect(() => { refresh(); }, [refresh]);
 
