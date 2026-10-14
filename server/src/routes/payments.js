@@ -33,7 +33,11 @@ async function settle(payment, ok, description, receipt) {
 
 paymentsRouter.get('/plans', (req, res) => res.json(listPlans()));
 
+// Tells the site whether online M-Pesa is switched on, and who to contact if not
+paymentsRouter.get('/config', (req, res) => res.json({ enabled: mpesa.isConfigured(), contact: process.env.PAYMENT_CONTACT || '' }));
+
 paymentsRouter.post('/stk', requireAuth, async (req, res) => {
+  if (!mpesa.isConfigured()) return res.status(503).json({ error: 'Online payment is not switched on yet. Please contact us to subscribe.' });
   const plan = PLANS[req.body && req.body.plan];
   if (!plan) return res.status(400).json({ error: 'Choose a plan' });
   const phone = mpesa.normalizePhone(req.body.phone);
@@ -54,7 +58,8 @@ paymentsRouter.post('/stk', requireAuth, async (req, res) => {
   } catch (e) {
     console.error('STK push failed:', e.message);
     await pool.query("UPDATE payments SET status = 'failed', result_desc = ? WHERE id = ?", [e.message.slice(0, 255), ins.insertId]);
-    res.status(502).json({ error: e.message });
+    // Never show setting names or other internal details to visitors
+    res.status(502).json({ error: /\.env/.test(e.message) ? 'Payment is temporarily unavailable. Please try again later.' : e.message });
   }
 });
 

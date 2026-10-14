@@ -7,6 +7,7 @@ export default function Pricing() {
   const { user, notify } = useApp();
   const navigate = useNavigate();
   const [plans, setPlans] = useState([]);
+  const [config, setConfig] = useState(null); // { enabled, contact } from the server
   const [chosen, setChosen] = useState(null);
   const [phone, setPhone] = useState('');
   const [state, setState] = useState('idle'); // idle | sending | waiting | success | failed
@@ -16,6 +17,7 @@ export default function Pricing() {
   const [params] = useSearchParams();
 
   useEffect(() => { api('/payments/plans').then(setPlans).catch(e => notify(e.message)); }, [notify]);
+  useEffect(() => { api('/payments/config').then(setConfig).catch(() => {}); }, []);
   useEffect(() => () => clearInterval(timer.current), []);
 
   // Arriving from the home page with ?plan=monthly selects that plan straight away
@@ -94,7 +96,17 @@ export default function Pricing() {
         ))}
       </div>
 
-      {chosen && (
+      {chosen && config && !config.enabled && (
+        <div ref={formRef} className="form-card" style={{ marginTop: 24 }}>
+          <h3>{chosen.label} plan · {money(chosen.amount)}</h3>
+          <div className="notice">
+            Online M-Pesa payment is not switched on yet. To subscribe, pay {money(chosen.amount)} and contact us
+            {config.contact ? <>: <b>{config.contact}</b></> : ''}. We will activate your plan as soon as your payment is confirmed.
+          </div>
+        </div>
+      )}
+
+      {chosen && !(config && !config.enabled) && (
         <form ref={formRef} className="form-card" style={{ marginTop: 24 }} onSubmit={pay}>
           <h3>{chosen.label} plan · {money(chosen.amount)}</h3>
           <div className="field">

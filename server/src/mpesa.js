@@ -108,4 +108,7 @@ async function stkQuery(checkoutRequestId) {
   return { done: true, success: String(data.ResultCode) === '0', description: data.ResultDesc };
 }
 
-module.exports = { normalizePhone, stkPush, stkQuery, callbackSecret, callbackUrl };
+// True only when all four live M-Pesa settings are present
+const isConfigured = () => ['MPESA_CONSUMER_KEY', 'MPESA_CONSUMER_SECRET', 'MPESA_SHORTCODE', 'MPESA_PASSKEY'].every(k => process.env[k]);
+
+module.exports = { normalizePhone, stkPush, stkQuery, callbackSecret, callbackUrl, isConfigured };
