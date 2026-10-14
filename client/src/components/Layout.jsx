@@ -40,7 +40,6 @@ export default function Layout() {
           <NavLink to="/matches">My matches</NavLink>
           <NavLink to="/pricing">Pricing</NavLink>
           {user && <NavLink to="/dashboard">Dashboard</NavLink>}
-          {user && user.isAdmin && <NavLink to="/admin">Admin</NavLink>}
         </nav>
         <div className="nav-actions">
           {user ? (
@@ -61,7 +60,6 @@ export default function Layout() {
           <Link to="/matches">My matches</Link>
           <Link to="/pricing">Pricing</Link>
           {user && <Link to="/dashboard">Dashboard</Link>}
-          {user && user.isAdmin && <Link to="/admin">Admin</Link>}
           {user
             ? <button className="menu-link" onClick={out}>Log out</button>
             : <Link to="/login">Company login</Link>}

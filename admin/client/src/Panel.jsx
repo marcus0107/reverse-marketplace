@@ -1,9 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Navigate } from 'react-router-dom';
-import { api, money } from '../api';
-import { useApp } from '../context.jsx';
-import { Loading } from '../components/Status.jsx';
-import '../admin.css';
+import { api, money } from './api';
 
 const TABS = [['overview', 'Overview'], ['companies', 'Companies'], ['payments', 'Payments'], ['requests', 'Buyer requests']];
 const date = d => (d ? new Date(d).toLocaleDateString('en-KE') : '–');
@@ -15,8 +11,7 @@ function companyState(c) {
   return [c.status, c.status === 'active' ? 'good' : 'warn'];
 }
 
-export default function Admin() {
-  const { user, notify } = useApp();
+export default function Panel({ notify, onExpired }) {
   const [tab, setTab] = useState('overview');
   const [loaded, setLoaded] = useState({ tab: null, data: null });
   // Only show data that belongs to the tab being displayed (each tab returns a different shape)
@@ -24,15 +19,14 @@ export default function Admin() {
 
   const load = useCallback(async () => {
     setLoaded({ tab: null, data: null });
-    try { setLoaded({ tab, data: await api('/admin/' + tab) }); } catch (e) { notify(e.message); }
-  }, [tab, notify]);
-  useEffect(() => { if (user && user.isAdmin) load(); }, [user, load]);
-
-  if (!user || !user.isAdmin) return <Navigate to="/" replace />;
+    try { setLoaded({ tab, data: await api('/' + tab) }); }
+    catch (e) { if (e.status === 401) onExpired(); else notify(e.message); }
+  }, [tab, notify, onExpired]);
+  useEffect(() => { load(); }, [load]);
 
   async function act(id, body, okMsg) {
-    try { await api('/admin/companies/' + id, { method: 'PATCH', body }); notify(okMsg); load(); }
-    catch (e) { notify(e.message); }
+    try { await api('/companies/' + id, { method: 'PATCH', body }); notify(okMsg); load(); }
+    catch (e) { if (e.status === 401) onExpired(); else notify(e.message); }
   }
 
   return (
@@ -42,7 +36,7 @@ export default function Admin() {
         {TABS.map(([id, label]) => <button key={id} className={tab === id ? 'on' : ''} onClick={() => setTab(id)}>{label}</button>)}
       </div>
 
-      {!data && <Loading />}
+      {!data && <div className="loading" role="status"><span className="spinner" /> Loading…</div>}
 
       {data && tab === 'overview' && (
         <div className="dashboard-grid">
@@ -66,12 +60,15 @@ export default function Admin() {
                 <td>{date(c.ends)}</td><td>{c.leads}</td>
                 <td><div className="admin-actions">
                   <button onClick={() => act(c.id, { addDays: 30 }, '30 days added')}>+30 days</button>
+                  <button onClick={() => act(c.id, { addDays: 90 }, '90 days added')}>+90 days</button>
                   <button className={c.suspended ? '' : 'danger'} onClick={() => act(c.id, { suspended: !c.suspended }, c.suspended ? 'Company restored' : 'Company suspended')}>
                     {c.suspended ? 'Restore' : 'Suspend'}
                   </button>
                 </div></td>
               </tr>);
-          })}</tbody>
+          })}
+            {!data.length && <tr><td colSpan="7">No companies yet.</td></tr>}
+          </tbody>
         </table></div>
       )}
 
@@ -84,7 +81,7 @@ export default function Admin() {
               <td><span className={'pill ' + (p.status === 'success' ? 'good' : p.status === 'pending' ? 'warn' : 'bad')}>{p.status}</span></td>
               <td className="wrap">{p.receipt || p.note || '–'}</td>
             </tr>))}
-            {!data.length && <tr><td colSpan="7">No payments yet.</td></tr>}
+            {!data.length && <tr><td colSpan="7">No online payments yet. Manual payments are not listed here.</td></tr>}
           </tbody>
         </table></div>
       )}

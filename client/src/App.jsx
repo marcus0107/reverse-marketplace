@@ -10,7 +10,6 @@ import Dashboard from './pages/Dashboard.jsx';
 import Listing from './pages/Listing.jsx';
 import { Loading } from './components/Status.jsx';
 import Pricing from './pages/Pricing.jsx';
-import Admin from './pages/Admin.jsx';
 import { ForgotPassword, ResetPassword } from './pages/ResetPassword.jsx';
 
 function Protected({ children }) {
@@ -27,7 +26,6 @@ export default function App() {
         <Route path="/request" element={<Request />} />
         <Route path="/matches" element={<Matches />} />
         <Route path="/company/:id" element={<Company />} />
-        <Route path="/admin" element={<Protected><Admin /></Protected>} />
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
