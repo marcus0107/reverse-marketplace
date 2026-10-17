@@ -33,6 +33,7 @@ const { paymentsRouter, mpesaRouter } = require('./src/routes/payments');
 app.post('/api/payments/stk', rateLimit({ windowMs: 60 * 60 * 1000, limit: 15, standardHeaders: true, legacyHeaders: false }));
 app.use('/api/payments', paymentsRouter);
 app.use('/api/mpesa', mpesaRouter);
+app.use('/api/admin', require('./src/routes/admin'));
 app.use('/api/companies', require('./src/routes/companies'));
 app.use('/api', (req, res) => res.status(404).json({ error: 'Not found' }));
 

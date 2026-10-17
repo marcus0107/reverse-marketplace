@@ -100,8 +100,8 @@ export default function Pricing() {
         <div ref={formRef} className="form-card" style={{ marginTop: 24 }}>
           <h3>{chosen.label} plan · {money(chosen.amount)}</h3>
           <div className="notice">
-            Send {money(chosen.amount)} by M-Pesa{config.contact ? <> to <b>{config.contact}</b></> : ''}. Then message us your company
-            name and the M-Pesa confirmation code, and we will activate your plan once the payment is confirmed.
+            Online M-Pesa payment is not switched on yet. To subscribe, pay {money(chosen.amount)} and contact us
+            {config.contact ? <>: <b>{config.contact}</b></> : ''}. We will activate your plan as soon as your payment is confirmed.
           </div>
         </div>
       )}
