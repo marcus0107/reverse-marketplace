@@ -26,3 +26,7 @@ h1, h2, h3 { text-wrap: balance; }
 .empty h3 { margin: 0 0 8px; font-size: 20px; }
 .empty > div { color: var(--muted); line-height: 1.7; }
 .empty .btn { margin-top: 16px; }
+
+/* Home page: soften the busy background photo so the text on top stays readable */
+.home-page .video-bg { filter: blur(3px) saturate(.75); transform: scale(1.05); }
+.home-page .video-bg::after { content: ''; position: absolute; inset: 0; background: rgba(247, 244, 255, .72); }

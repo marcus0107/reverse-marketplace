@@ -7,6 +7,8 @@ import '@fontsource-variable/inter';
 import './style.css';
 import './mobile.css';
 import './theme.css';
+import './app-layouts.css';
+import './dark.css'; // must stay last
 
 createRoot(document.getElementById('root')).render(
   <BrowserRouter>
